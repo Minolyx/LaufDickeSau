@@ -1,10 +1,13 @@
 package seminar.wahlpflicht.android.hsnr.de.laufdickesau;
 
 import android.util.Log;
+import com.google.android.gms.maps.model.LatLng;
 
 final public class CallbackLib {
 
     private static MainActivity mainActivity = null;
+    private static Polyline polyline = null;
+
     public static void initCallbackLib(MainActivity mainActivity)
     { CallbackLib.mainActivity = mainActivity; }
 
@@ -14,11 +17,17 @@ final public class CallbackLib {
 
         Log.d("gps", "Coords: " + mainActivity.gps.getLongitude() + " " + mainActivity.gps.getLatitude());
 
+        polyline = Polyline.initPolyline(mainActivity);
+        try{
+            polyline.setCurrentPosition(mainActivity.gps.getLongitude(), mainActivity.gps.getLatitude());
+        }catch (Exception e){
+
+        }
+
+
     }
 //TODO: declare your methods over here #############################################################
 
     int counter = 0;
-
-
 
 }

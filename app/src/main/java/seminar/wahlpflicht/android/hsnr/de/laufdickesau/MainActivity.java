@@ -8,6 +8,9 @@ import android.widget.Button;
 
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.PolylineOptions;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
     protected Button gpsStartButton = null;
     protected Button gpsStopButton = null;
     protected MainActivity that = this;
+    protected PolylineOptions polyline = new PolylineOptions();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
