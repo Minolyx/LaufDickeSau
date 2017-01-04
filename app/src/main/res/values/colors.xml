@@ -25,6 +25,7 @@
     <color name="darkorrange">#cc2303</color>
     <color name="pressed_color">#FF8E4067</color>
     <color name="focussed_color">#DD8E4067</color>
+    <color name="pink">#FFC0CB</color>
 
 
 </resources>
