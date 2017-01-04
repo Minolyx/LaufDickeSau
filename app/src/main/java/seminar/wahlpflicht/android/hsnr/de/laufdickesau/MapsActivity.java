@@ -2,6 +2,7 @@ package seminar.wahlpflicht.android.hsnr.de.laufdickesau;
 
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -9,12 +10,14 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private static MainActivity mainActivity = null;
     private static Polyline polyline = null;
+    private PolylineOptions polylineOpt = new PolylineOptions();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +58,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     protected void drawPolyline(){
-        mMap.addPolyline(polyline.getPolylineOpt());
+        polylineOpt = polyline.getPolylineOpt();
+        mMap.addPolyline(polylineOpt);
+        Log.d("MapsActivity", "currentPost: " + polyline.getCurrentPosition());
         mMap.moveCamera(CameraUpdateFactory.newLatLng(polyline.getCurrentPosition()));
     }
 }

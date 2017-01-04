@@ -2,6 +2,8 @@ package seminar.wahlpflicht.android.hsnr.de.laufdickesau;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
+
+import android.renderscript.Double2;
 import android.util.Log;
 
 
@@ -13,9 +15,9 @@ public class Polyline {
 
     private static Polyline polyline =null;
     private MainActivity mainActivity = null;
-    protected LatLng currentPosition = null;
-    protected LatLng previousPosition = null;
-    protected PolylineOptions polylineOpt;
+    protected static LatLng currentPosition = null;
+    protected static LatLng previousPosition = null;
+    protected static PolylineOptions polylineOpt = new PolylineOptions().color(R.color.sky);
 
 
     private Polyline(MainActivity that) {
@@ -40,23 +42,21 @@ public class Polyline {
 
     protected void setCurrentPosition(double lat, double lng){
         currentPosition = new LatLng(lat, lng);
-        Log.d("polyline", "setcurrentPosition: " + currentPosition.latitude + " " + currentPosition.longitude);
         addGeoPointToPolyline();
     }
 
 
     protected void addGeoPointToPolyline(){
-        Log.d("polyline", "inside of addGeoPointToPolyline. prevPos: " + previousPosition.latitude + previousPosition.longitude + " current: " + currentPosition.latitude + currentPosition.longitude);
         if(previousPosition == null) {
             polylineOpt.add(currentPosition);
 
-            Log.d("polyline", "addGeo.true: " + currentPosition.latitude + " " + currentPosition.longitude);
+            Log.d("polyline", "added geoPoint. prev == null");
             previousPosition = currentPosition;
         }else{
             if(distance(previousPosition, currentPosition) > 1){
                 polylineOpt.add(currentPosition);
 
-                Log.d("polyline", "addGeo.false: " + currentPosition.latitude + " " + currentPosition.longitude);
+                Log.d("polyline", "added geoPoint. dist > 1");
                 previousPosition = currentPosition;
             }
         }
@@ -76,6 +76,8 @@ public class Polyline {
                 * Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2));
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         double dist = earthRadius * c;
+
+        Log.d("polyline", "inside of distance. dist: " + Double.toString(dist));
 
         return dist;
     }

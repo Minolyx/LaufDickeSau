@@ -19,9 +19,9 @@ final public class CallbackLib {
 
         polyline = Polyline.initPolyline(mainActivity);
         try{
-            polyline.setCurrentPosition(mainActivity.gps.getLongitude(), mainActivity.gps.getLatitude());
+            polyline.setCurrentPosition(mainActivity.gps.getLatitude(), mainActivity.gps.getLongitude());
         }catch (Exception e){
-
+            e.printStackTrace();
         }
 
 
