@@ -17,6 +17,8 @@ public class Polyline {
     private MainActivity mainActivity = null;
     protected static LatLng currentPosition = null;
     protected static LatLng previousPosition = null;
+    protected double distance = 0;
+    protected static double distanceTotal = 0;
     protected static PolylineOptions polylineOpt = new PolylineOptions().color(R.color.sky);
 
 
@@ -32,6 +34,7 @@ public class Polyline {
     public LatLng getCurrentPosition(){
         return currentPosition;
     }
+    public double getDistanceTotal(){return distanceTotal;}
 
     public PolylineOptions getPolylineOpt(){
         for(int i = 0; i < this.polylineOpt.getPoints().size(); i++){
@@ -53,8 +56,10 @@ public class Polyline {
             Log.d("polyline", "added geoPoint. prev == null");
             previousPosition = currentPosition;
         }else{
-            if(distance(previousPosition, currentPosition) > 1){
+
+            if((distance += distance(previousPosition, currentPosition)) > 1){
                 polylineOpt.add(currentPosition);
+                distanceTotal += distance;
 
                 Log.d("polyline", "added geoPoint. dist > 1");
                 previousPosition = currentPosition;
