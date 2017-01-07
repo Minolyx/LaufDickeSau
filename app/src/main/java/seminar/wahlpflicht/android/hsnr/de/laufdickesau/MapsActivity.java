@@ -66,7 +66,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         thr.start();
 
-
+        //TODO: TEST
         //drawPolyline();
 /*
         try{
