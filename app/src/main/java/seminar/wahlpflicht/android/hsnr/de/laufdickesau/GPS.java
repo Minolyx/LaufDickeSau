@@ -13,7 +13,14 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.widget.Toast;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+
 import static android.location.LocationProvider.AVAILABLE;
 import static android.location.LocationProvider.OUT_OF_SERVICE;
 import static android.location.LocationProvider.TEMPORARILY_UNAVAILABLE;
@@ -27,17 +34,26 @@ final public class GPS extends FragmentActivity {
     private LocationManager locationManager = null;
     private LocationListener locationListener = null;
     private Location gpsLocation = null;
+    private ArrayList<Double> geoPointLat = null;
+    private ArrayList<Double> geoPointLon = null;
+    private ArrayList<Double> geoPointAlt = null;
+    private ArrayList<Double> geoPointAcc = null;
     private double latitude = 0.0;
     private double longitude = 0.0;
     private double altitude = 0.0;
     private double accuracy = 0.0;
-    private int REFRESH_RATE_2000 = 2000;
+    private int REFRESH_RATE = 200;
+    private boolean calculate = false;
 
     private GPS(MainActivity that) {
         this.mainActivity = that;
         new PermissionHandler(that);
         initializeLocationManager();
         initializeLocationListener();
+        this.geoPointLat = new ArrayList<>(10);
+        this.geoPointLon = new ArrayList<>(10);
+        this.geoPointAlt = new ArrayList<>(10);
+        this.geoPointAcc = new ArrayList<>(10);
     }
 
     static protected GPS initGPSService(MainActivity that) {
@@ -58,18 +74,57 @@ final public class GPS extends FragmentActivity {
         this.locationManager = (LocationManager) mainActivity.getSystemService(LOCATION_SERVICE);
     }
 
+    private void locationListenerHelper(Location location) {
+        if(geoPointAcc.size() < 10 && location.getAccuracy() > 19) {
+
+            geoPointLat.add(location.getLatitude());
+            geoPointLon.add(location.getLongitude());
+            geoPointAlt.add(location.getAltitude());
+            geoPointAcc.add((double)location.getAccuracy());
+
+        } else if(location.getAccuracy() > 19){
+
+            Double lat[] = new Double[10];
+            Double lon[] = new Double[10];
+            Double alt[] = new Double[10];
+            Double acc[] = new Double[10];
+
+            geoPointLat.toArray(lat);
+            geoPointLon.toArray(lon);
+            geoPointAlt.toArray(alt);
+            geoPointAcc.toArray(acc);
+
+            Arrays.sort(lat);
+            Arrays.sort(lon);
+            Arrays.sort(alt);
+            Arrays.sort(acc);
+
+            geoPointLat.clear();
+            geoPointLon.clear();
+            geoPointAlt.clear();
+            geoPointAcc.clear();
+
+            geoPointLat.add(location.getLatitude());
+            geoPointLon.add(location.getLongitude());
+            geoPointAlt.add(location.getAltitude());
+            geoPointAcc.add((double)location.getAccuracy());
+
+            latitude = (lat[4] + lat[5]) / 2;
+            longitude = (lon[4] + lon[5]) / 2;
+            accuracy = (acc[4] + acc[5]) / 2;
+            altitude = (alt[4] + alt[5]) / 2;
+
+            CallbackLib.gpsCallback();
+
+        }
+    }
+
     protected void initializeLocationListener() {
             this.locationListener = new LocationListener() {
 
                 @Override
                 public void onLocationChanged(Location location) {
-
-                    latitude = location.getLatitude();
-                    longitude = location.getLongitude();
-                    accuracy = location.getAccuracy();
-                    altitude = location.getAltitude();
-                    CallbackLib.gpsCallback();
-
+                    locationListenerHelper(location);
                 }
 
                 @Override
@@ -117,14 +172,14 @@ final public class GPS extends FragmentActivity {
     }
 
     protected void setRefreshRate(int rate_ms) {
-        this.REFRESH_RATE_2000 = rate_ms;
-        Toast.makeText(mainActivity, "Refresh rate set to " + this.REFRESH_RATE_2000 + "ms!", Toast.LENGTH_SHORT).show();
+        this.REFRESH_RATE = rate_ms;
+        Toast.makeText(mainActivity, "Refresh rate set to " + this.REFRESH_RATE + "ms!", Toast.LENGTH_SHORT).show();
     }
 
     protected void requestLocationUpdates() {
         try {
             if(ContextCompat.checkSelfPermission(mainActivity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-            this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, this.REFRESH_RATE_2000, 0, this.locationListener);
+            this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, this.REFRESH_RATE, 0, this.locationListener);
             else new PermissionHandler(mainActivity);
         }catch (SecurityException se) {
 

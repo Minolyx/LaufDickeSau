@@ -27,7 +27,9 @@ final public class ThreadOverhaul<T> extends Thread {
         if (queue == null)
             queue = new ArrayList<ThreadOverhaul>();
 
-        this.setName(name);
+        if(!this.getName().equals(name)) this.setName(name);
+        else return;
+
         this.milliSeconds = milliSeconds;
         this.loop = this.counter = loop;
         this.obj = obj;

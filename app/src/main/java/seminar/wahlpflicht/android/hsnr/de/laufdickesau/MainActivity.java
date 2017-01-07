@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -17,8 +18,8 @@ public class MainActivity extends AppCompatActivity {
 //TODO: Declare variables over here ################################################################
 
     protected GPS gps = null;
-    protected Button gpsStartButton = null;
-    protected Button gpsStopButton = null;
+    protected Button gpsButton = null;
+    protected TextView textView = null;
     protected MainActivity that = this;
     protected PolylineOptions polyline = new PolylineOptions();
 
@@ -31,28 +32,38 @@ public class MainActivity extends AppCompatActivity {
 
         gps = GPS.initGPSService(this);
         CallbackLib.initCallbackLib(this);
-        gpsStartButton = (Button) findViewById(R.id.startButton);
-        gpsStopButton = (Button) findViewById(R.id.stopButton);
-
+        gpsButton = (Button) findViewById(R.id.startButton);
+        textView = (TextView) findViewById(R.id.textView);
+        textView.setText(" \n\n\n\n\t\t              Hold Start/Stop for map display\n");
 
 //TODO: Set buttons/views ect. over here ###########################################################
 
-        gpsStartButton.setOnClickListener(new View.OnClickListener() {
+        gpsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                gps.requestLocationUpdates();
+                try {
+                    if (gpsButton.getText().equals("Start")) {
+                        gps.requestLocationUpdates();
+                        gpsButton.setText("Stop");
+                    } else {
+                        gps.removeLocationUpdates();
+                        gpsButton.setText("Start");
+                    }
+                } catch (Exception e) {}
+
+                textView.setText("\n\n\n\n         Lat: " + gps.getLatitude() + "\n\n         Long: " + gps.getLongitude() + "\n\n         Alt: " + gps.getAltitude() + "\n\n         Acc: " + gps.getAccuracy());
 
             }
         });
 
-        gpsStopButton.setOnClickListener(new View.OnClickListener() {
+        gpsButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public void onClick(View view) {
-
-                gps.removeLocationUpdates();
-                startActivity(new Intent(MainActivity.this, MapsActivity.class));
-
+            public boolean onLongClick(View view) {
+                try {
+                    startActivity(new Intent(MainActivity.this, MapsActivity.class));
+                } catch (Exception e) {}
+                return true;
 
             }
         });
