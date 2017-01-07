@@ -4,6 +4,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -11,6 +12,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -88,27 +90,53 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void drawPolyline(){
         polylineOpt = polyline.getPolylineOpt();
         mMap.clear();
-        mMap.addMarker(new MarkerOptions()
-            .position(new LatLng(polylineOpt.getPoints().get(0).latitude, polylineOpt.getPoints().get(0).longitude))
-            .title("Start")
-            //.icon(BitmapDescriptorFactory.fromResource(R.drawable.piggy_start))
-                // gif leider nicht möglich ohne methode zu schreiben die ständig marker entfernt und
-                // neuen marker setzt mit dem nächsten bild. und so sieht das nicht sehr gut aus.
-                // kannst es ja mal einkommentieren dann siehste es
-           .icon(BitmapDescriptorFactory.defaultMarker(250))
-        );
 
-
-        mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(polyline.getCurrentPosition().latitude, polyline.getCurrentPosition().longitude))
-                .title("Finish")
-                //.icon(BitmapDescriptorFactory.fromResource(R.drawable.piggy_run))
-                .icon(BitmapDescriptorFactory.defaultMarker(320))
-        );
+        Marker startMarker = getStartMarker();
+        Marker finishMarker = getFinishMarker();
 
         mMap.addPolyline(polylineOpt);
 
-        Log.d("MapsActivity", "currentPost: " + polyline.getCurrentPosition());
+        mMap.moveCamera(getCamBounds(startMarker, finishMarker));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(polyline.getCurrentPosition()));
+    }
+
+    protected Marker getStartMarker(){
+        Marker start = mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(polylineOpt.getPoints().get(0).latitude, polylineOpt.getPoints().get(0).longitude))
+                .title("Start")
+                //.icon(BitmapDescriptorFactory.fromResource(R.drawable.piggy_start))
+                // gif leider nicht möglich ohne methode zu schreiben die ständig marker entfernt und
+                // neuen marker setzt mit dem nächsten bild. und so sieht das nicht sehr gut aus.
+                // kannst es ja mal einkommentieren dann siehste es
+                .icon(BitmapDescriptorFactory.defaultMarker(250))
+        );
+        return start;
+    }
+    protected Marker getFinishMarker(){
+        Marker finish = mMap.addMarker(new MarkerOptions()
+                .position(polyline.getCurrentPosition())
+                .title("Finish")
+                //.icon(BitmapDescriptorFactory.fromResource(R.drawable.piggy_run))
+                .icon(BitmapDescriptorFactory.defaultMarker(320))
+                .snippet(String.format("Distance: %.2fm", polyline.getDistanceTotal()))
+        );
+        return finish;
+    }
+
+    protected CameraUpdate getCamBounds(Marker finish, Marker start){
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+        builder.include(start.getPosition());
+        builder.include(finish.getPosition());
+
+        LatLngBounds bounds = builder.build();
+
+        int width = getResources().getDisplayMetrics().widthPixels;
+        int height = getResources().getDisplayMetrics().heightPixels;
+        int padding = (int) (width * 0.10);
+
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
+
+        return cu;
     }
 }
