@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
         gps = GPS.initGPSService(this);
         CallbackLib.initCallbackLib(this);
+        MapsActivity.initMapsActivity(this);
         gpsButton = (Button) findViewById(R.id.startButton);
         textView = (TextView) findViewById(R.id.textView);
         textView.setText(" \n\n\n\n\t\t              Hold Start/Stop for map display\n");

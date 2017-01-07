@@ -24,6 +24,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static Polyline polyline = null;
     private PolylineOptions polylineOpt = new PolylineOptions();
     private ThreadOverhaul thr = null;
+    private LatLng lastDrawnPosition = null;
+    private boolean refresh = true;
+    private boolean noRefresh = false;
+    private float zoomLevel = 16.0f;
+
+    public static void initMapsActivity(MainActivity mainActivity) { MapsActivity.mainActivity = mainActivity; }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,24 +56,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
         polyline = Polyline.initPolyline(mainActivity);
 
-        thr = new ThreadOverhaul("map", 5000, "show", new Object() {
 
-            public void show() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        drawPolyline();
-                    }
-                });
+        if (polyline.getCurrentPosition() == null){
+            Marker hsnrMarker = getDefaultMarker();
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hsnrMarker.getPosition(), zoomLevel));
+            hsnrMarker.showInfoWindow();
+        }else{
+            thr = new ThreadOverhaul("map", 5000, "show", new Object() {
 
+                public void show() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(lastDrawnPosition != polyline.getPreviousPosition()) {
+                                drawPolyline(refresh);
+                                lastDrawnPosition = polyline.getPreviousPosition();
+                            }
+                        }
+                    });
+
+                }
+
+            }, true, 1000000);
+
+            if (mainActivity.gpsButton.getText().equals("Start")){
+                drawPolyline(noRefresh);
+            }else{
+                thr.start();
             }
 
-        }, true, 1000000);
 
-        thr.start();
 
-        //TODO: TEST
-        //drawPolyline();
+
+            //TODO: TEST
+            //drawPolyline();
 /*
         try{
             drawPolyline();
@@ -78,16 +100,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         }
 */
+        }
+
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        thr.kill();
+        if(thr != null){thr.kill();}
+
 
     }
 
-    protected void drawPolyline(){
+    protected void drawPolyline(boolean running){
         polylineOpt = polyline.getPolylineOpt();
         mMap.clear();
 
@@ -96,8 +122,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mMap.addPolyline(polylineOpt);
 
-        mMap.moveCamera(getCamBounds(startMarker, finishMarker));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(polyline.getCurrentPosition()));
+
+        if(running){
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(polyline.getCurrentPosition(), zoomLevel), 2000, null);
+        }else {
+            mMap.moveCamera(getCamBounds(startMarker, finishMarker));
+            finishMarker.showInfoWindow();
+        }
+
     }
 
     protected Marker getStartMarker(){
@@ -121,6 +153,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .snippet(String.format("Distance: %.2fm", polyline.getDistanceTotal()))
         );
         return finish;
+    }
+
+    protected Marker getDefaultMarker(){
+
+        Marker hsnr = mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(51.31686, 6.57144))
+                .title("HSNR")
+                .snippet("No GPS available."));
+
+        return hsnr;
     }
 
     protected CameraUpdate getCamBounds(Marker finish, Marker start){

@@ -31,9 +31,8 @@ public class Polyline {
         return polyline;
     }
 
-    public LatLng getCurrentPosition(){
-        return currentPosition;
-    }
+    public LatLng getCurrentPosition(){return currentPosition;}
+    public LatLng getPreviousPosition(){return previousPosition;}
     public double getDistanceTotal(){return distanceTotal;}
 
     public PolylineOptions getPolylineOpt(){
