@@ -1,8 +1,15 @@
 package seminar.wahlpflicht.android.hsnr.de.laufdickesau;
 
+import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -61,6 +68,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         polyline = Polyline.initPolyline(mainActivity);
+
+
+        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+
+            @Override
+            public View getInfoWindow(Marker arg0) {
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+
+                Context context = getApplicationContext(); //or getActivity(), YourActivity.this, etc.
+
+                LinearLayout info = new LinearLayout(context);
+                info.setOrientation(LinearLayout.VERTICAL);
+
+                TextView title = new TextView(context);
+                title.setTextColor(Color.BLACK);
+                title.setGravity(Gravity.CENTER);
+                title.setTypeface(null, Typeface.BOLD);
+                title.setText(marker.getTitle());
+
+                TextView snippet = new TextView(context);
+                snippet.setTextColor(Color.GRAY);
+                snippet.setText(marker.getSnippet());
+
+                info.addView(title);
+                info.addView(snippet);
+
+                return info;
+            }
+        });
 
         if (polyline.getCurrentPosition() == null){
             Marker hsnrMarker = getDefaultMarker();
@@ -161,10 +201,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected Marker getFinishMarker(){
         Marker finish = mMap.addMarker(new MarkerOptions()
                 .position(polyline.getCurrentPosition())
-                .title("Finish")
+                .title("Current Position")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.piggy_run_small))
                 //.icon(BitmapDescriptorFactory.defaultMarker(320))
-                .snippet(String.format("Distance: %.2fm", polyline.getDistanceTotal()))
+                .snippet("Time: " + mainActivity.timerString + "\n" + String.format("Distance: %.2fm", polyline.getDistanceTotal()))
         );
         return finish;
     }
@@ -195,4 +235,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         return cu;
     }
+
+
 }

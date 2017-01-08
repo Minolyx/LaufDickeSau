@@ -5,6 +5,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Handler;
 import android.provider.Settings;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -30,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     protected ThreadOverhaul thr = null;
     protected boolean started = false;
     protected boolean isMapOpen = false;
+    protected String timerString = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +47,8 @@ public class MainActivity extends AppCompatActivity {
         gpsButton = (Button) findViewById(R.id.startButton);
         textView = (TextView) findViewById(R.id.textView);
         textViewTimer = (TextView) findViewById(R.id.timerTextView);
-        textViewTimer.setVisibility(View.INVISIBLE);
-        textView.setText(" \n\n\n\n\t\t              Hold Start/Stop for map display\n");
+        textView.setText("\n\n\n\nHold Start/Stop to show map\n");
+        textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
 
 //TODO: Set buttons/views ect. over here ###########################################################
 
@@ -62,14 +64,13 @@ public class MainActivity extends AppCompatActivity {
                         if(!started) {
                             that.thr = new ThreadOverhaul("Countdown_10", 1000, "startTimer", new Object() {
 
-                                private int counter = 9;
+                                private int counter = 3;
 
                                 public void startTimer() {
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
                                             that.textView.setTextSize(56);
-                                            that.textView.setTextColor(Color.rgb(250, 50, 120));
                                             that.textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                                             that.textView.setText("\n" + counter);
                                             counter--;
@@ -77,9 +78,8 @@ public class MainActivity extends AppCompatActivity {
                                             if (counter < 0) {
 
                                                 that.textView.setTextSize(24);
-                                                that.textView.setTextColor(Color.rgb(150, 180, 120));
 
-                                                textView.setText("\n\nLat: "
+                                                textView.setText("\nLat: "
                                                         + gps.getLatitude()
                                                         + "\nLong: "
                                                         + gps.getLongitude()
@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
                                     @Override
                                     public void run() {
 
-                                        textView.setText("\n\nLat: "
+                                        textView.setText("\nLat: "
                                                 + gps.getLatitude()
                                                 + "\nLong: "
                                                 + gps.getLongitude()
@@ -122,9 +122,9 @@ public class MainActivity extends AppCompatActivity {
                                                 + "\nAcc: "
                                                 + gps.getAccuracy()
                                                 + "\nDistance: "
-                                                + String.format("%.2fm", polyline.getDistanceTotal())
-                                                + "\nTime: "
-                                                + String.format("%02d:%02d:%02d", hours, minutes, seconds));
+                                                + String.format("%.2fm", polyline.getDistanceTotal()));
+                                        timerString = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+                                        textViewTimer.setText(timerString);
 
                                         if(seconds == 59) {
                                             seconds = 0;
