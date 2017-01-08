@@ -22,6 +22,9 @@ final public class ThreadOverhaul<T> extends Thread {
     private boolean wakeable = true;
     private boolean snooze = true;
 
+    public final static int LOOP_INFINIT = -1;
+    public final static boolean REMEMBER = true;
+
     ThreadOverhaul(String name, int milliSeconds, String invokeMethods, T obj, boolean reuseThread, int loop) {
 
         if (queue == null)
@@ -131,7 +134,10 @@ final public class ThreadOverhaul<T> extends Thread {
     public void start() {
 
         try {
-            if (!isAlive()) super.start();
+            if (!isAlive()) {
+                super.start();
+                Log.d("Start", "Thread \"".concat(this.getName()).concat("\": started!\n"));
+            }
         } catch (Exception e) {
         }
 

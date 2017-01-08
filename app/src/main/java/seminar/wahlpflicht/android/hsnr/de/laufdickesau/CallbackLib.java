@@ -15,7 +15,7 @@ final public class CallbackLib {
 
 //TODO: Call your methods over here ################################################################
         polyline = Polyline.initPolyline(mainActivity);
-        CallbackLib.showDebugInfo();
+        //CallbackLib.showDebugInfo();
         CallbackLib.addPolyline();
 
 
@@ -31,12 +31,16 @@ final public class CallbackLib {
     }
 
     private static void showDebugInfo() {
-        mainActivity.textView.setText("\n\n\n\n         Lat: "
-                + mainActivity.gps.getLatitude() + "\n\n         Long: "
-                + mainActivity.gps.getLongitude() + "\n\n         Alt: "
-                + mainActivity.gps.getAltitude() + "\n\n         Acc: "
-                + mainActivity.gps.getAccuracy() + "\n\n         Distance: ");
-                //+ String.format("%.2fm", polyline.getDistanceTotal()));
-    }
 
+        mainActivity.textView.setText("\n\nLat: "
+                + mainActivity.gps.getLatitude()
+                + "\nLong: "
+                + mainActivity.gps.getLongitude()
+                + "\nAlt: "
+                + mainActivity.gps.getAltitude()
+                + "\nAcc: "
+                + mainActivity.gps.getAccuracy()
+                + "\nDistance: "
+                + String.format("%.2fm", polyline.getDistanceTotal()));
+    }
 }

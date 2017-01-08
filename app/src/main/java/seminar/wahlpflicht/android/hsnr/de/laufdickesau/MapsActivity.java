@@ -29,7 +29,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private boolean noRefresh = false;
     private float zoomLevel = 16.0f;
 
-    public static void initMapsActivity(MainActivity mainActivity) { MapsActivity.mainActivity = mainActivity; }
+
+    public static void initMapsActivity(MainActivity mainActivity) {
+        MapsActivity.mainActivity = mainActivity;
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +43,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+
     }
 
 
@@ -56,13 +62,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
         polyline = Polyline.initPolyline(mainActivity);
 
-
         if (polyline.getCurrentPosition() == null){
             Marker hsnrMarker = getDefaultMarker();
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hsnrMarker.getPosition(), zoomLevel));
             hsnrMarker.showInfoWindow();
         }else{
-            thr = new ThreadOverhaul("map", 5000, "show", new Object() {
+            thr = new ThreadOverhaul("mapUpdater", 5000, "show", new Object() {
 
                 public void show() {
                     runOnUiThread(new Runnable() {
@@ -77,7 +82,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 }
 
-            }, true, 1000000);
+            }, ThreadOverhaul.REMEMBER, 1000000);
 
             if (mainActivity.gpsButton.getText().equals("Start")){
                 drawPolyline(noRefresh);
@@ -106,10 +111,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
-        if(thr != null){thr.kill();}
-
+        if(thr != null){thr.getThreadByName("mapUpdater").kill();}
 
     }
 
@@ -129,8 +144,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.moveCamera(getCamBounds(startMarker, finishMarker));
             finishMarker.showInfoWindow();
         }
-
-
     }
 
     protected Marker getStartMarker(){

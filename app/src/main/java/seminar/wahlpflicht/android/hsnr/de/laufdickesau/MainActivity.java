@@ -1,7 +1,10 @@
 package seminar.wahlpflicht.android.hsnr.de.laufdickesau;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -21,9 +24,12 @@ public class MainActivity extends AppCompatActivity {
     protected GPS gps = null;
     protected Button gpsButton = null;
     protected TextView textView = null;
+    protected TextView textViewTimer = null;
     protected MainActivity that = this;
     protected Polyline polyline = null;
-    protected Timer timer = null;
+    protected ThreadOverhaul thr = null;
+    protected boolean started = false;
+    protected boolean isMapOpen = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,10 +42,10 @@ public class MainActivity extends AppCompatActivity {
         CallbackLib.initCallbackLib(this);
         MapsActivity.initMapsActivity(this);
         polyline = Polyline.initPolyline(this);
-        timer = Timer.initTimer(this);
         gpsButton = (Button) findViewById(R.id.startButton);
         textView = (TextView) findViewById(R.id.textView);
-        timer.timerTextView = (TextView) findViewById(R.id.timerTextView);
+        textViewTimer = (TextView) findViewById(R.id.timerTextView);
+        textViewTimer.setVisibility(View.INVISIBLE);
         textView.setText(" \n\n\n\n\t\t              Hold Start/Stop for map display\n");
 
 //TODO: Set buttons/views ect. over here ###########################################################
@@ -50,17 +56,102 @@ public class MainActivity extends AppCompatActivity {
 
                 try {
                     if (gpsButton.getText().equals("Start")) {
+
                         gps.requestLocationUpdates();
-                        timer.startTime();
+
+                        if(!started) {
+                            that.thr = new ThreadOverhaul("Countdown_10", 1000, "startTimer", new Object() {
+
+                                private int counter = 9;
+
+                                public void startTimer() {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            that.textView.setTextSize(56);
+                                            that.textView.setTextColor(Color.rgb(250, 50, 120));
+                                            that.textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                                            that.textView.setText("\n" + counter);
+                                            counter--;
+
+                                            if (counter < 0) {
+
+                                                that.textView.setTextSize(24);
+                                                that.textView.setTextColor(Color.rgb(150, 180, 120));
+
+                                                textView.setText("\n\nLat: "
+                                                        + gps.getLatitude()
+                                                        + "\nLong: "
+                                                        + gps.getLongitude()
+                                                        + "\nAlt: "
+                                                        + gps.getAltitude()
+                                                        + "\nAcc: "
+                                                        + gps.getAccuracy()
+                                                        + "\nDistance: "
+                                                        + String.format("%.2fm", polyline.getDistanceTotal()));
+
+                                                that.thr.getThreadByName("timeElapsed").start();
+                                                that.started = true;
+                                            }
+                                        }
+                                    });
+
+                                }
+
+                            }, !ThreadOverhaul.REMEMBER, 10);
+                            that.thr.start();
+                        }
+
+                        new ThreadOverhaul("timeElapsed", 1000, "startTimer", new Object() {
+
+                            private long seconds = 0;
+                            private long minutes = 0;
+                            private long hours = 0;
+
+                            public void startTimer() {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+
+                                        textView.setText("\n\nLat: "
+                                                + gps.getLatitude()
+                                                + "\nLong: "
+                                                + gps.getLongitude()
+                                                + "\nAlt: "
+                                                + gps.getAltitude()
+                                                + "\nAcc: "
+                                                + gps.getAccuracy()
+                                                + "\nDistance: "
+                                                + String.format("%.2fm", polyline.getDistanceTotal())
+                                                + "\nTime: "
+                                                + String.format("%02d:%02d:%02d", hours, minutes, seconds));
+
+                                        if(seconds == 59) {
+                                            seconds = 0;
+                                            minutes++;
+                                            if(minutes == 59) {
+                                                minutes = 0;
+                                                hours++;
+                                            }
+                                        }
+
+                                        seconds++;
+                                    }
+                                });
+
+                            }
+
+                        }, ThreadOverhaul.REMEMBER, 1000000000);
+
+                        thr.getThreadByName("timeElapsed").wake();
                         gpsButton.setText("Stop");
+
                     } else {
                         gps.removeLocationUpdates();
-                        timer.stopTime();
                         gpsButton.setText("Start");
+                        thr.getThreadByName("timeElapsed").hibernate();
                     }
                 } catch (Exception e) {}
-
-                textView.setText("\n\n         Lat: " + gps.getLatitude() + "\n\n         Long: " + gps.getLongitude() + "\n\n         Alt: " + gps.getAltitude() + "\n\n         Acc: " + gps.getAccuracy() + "\n\n         Distance: " + String.format("%.2fm", polyline.getDistanceTotal()));
 
             }
         });
@@ -70,6 +161,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onLongClick(View view) {
                 try {
                     startActivity(new Intent(MainActivity.this, MapsActivity.class));
+                    isMapOpen = true;
                 } catch (Exception e) {}
                 return true;
 
@@ -85,7 +177,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(!isMapOpen) System.exit(0);
+        else isMapOpen = false;
+
     }
 }
