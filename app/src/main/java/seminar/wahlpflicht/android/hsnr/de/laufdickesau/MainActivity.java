@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
         gpsButton = (Button) findViewById(R.id.startButton);
         textView = (TextView) findViewById(R.id.textView);
         textViewTimer = (TextView) findViewById(R.id.timerTextView);
+        textViewTimer.setVisibility(View.INVISIBLE);
         textView.setText("\n\n\n\nHold Start/Stop to show map\n");
         textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
 
@@ -91,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
                                                         + String.format("%.2fm", polyline.getDistanceTotal()));
 
                                                 that.thr.getThreadByName("timeElapsed").start();
+                                                textViewTimer.setVisibility(View.VISIBLE);
                                                 that.started = true;
                                             }
                                         }
