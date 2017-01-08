@@ -130,6 +130,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             finishMarker.showInfoWindow();
         }
 
+
     }
 
     protected Marker getStartMarker(){
