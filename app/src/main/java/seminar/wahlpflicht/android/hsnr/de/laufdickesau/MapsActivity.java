@@ -149,8 +149,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Marker finish = mMap.addMarker(new MarkerOptions()
                 .position(polyline.getCurrentPosition())
                 .title("Finish")
-                //.icon(BitmapDescriptorFactory.fromResource(R.drawable.piggy_run))
-                .icon(BitmapDescriptorFactory.defaultMarker(320))
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.piggy_run_small))
+                //.icon(BitmapDescriptorFactory.defaultMarker(320))
                 .snippet(String.format("Distance: %.2fm", polyline.getDistanceTotal()))
         );
         return finish;
