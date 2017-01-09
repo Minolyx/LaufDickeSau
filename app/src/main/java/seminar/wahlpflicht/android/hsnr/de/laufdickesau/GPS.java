@@ -82,7 +82,7 @@ final public class GPS extends FragmentActivity {
             geoPointAlt.add(location.getAltitude());
             geoPointAcc.add((double)location.getAccuracy());
 
-        } else {
+        } else if (location.getAccuracy() >= 16){
 
             Double lat[] = new Double[10];
             Double lon[] = new Double[10];
