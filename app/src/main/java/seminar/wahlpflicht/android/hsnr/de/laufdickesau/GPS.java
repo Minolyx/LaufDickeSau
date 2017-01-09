@@ -75,7 +75,7 @@ final public class GPS extends FragmentActivity {
 
     private void locationListenerHelper(Location location) {
 
-        if(geoPointAcc.size() < 10) {
+        if(geoPointAcc.size() < 10 && location.getAccuracy() >= 16) {
 
             geoPointLat.add(location.getLatitude());
             geoPointLon.add(location.getLongitude());
