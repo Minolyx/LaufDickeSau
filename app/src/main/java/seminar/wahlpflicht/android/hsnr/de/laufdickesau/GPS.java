@@ -75,14 +75,28 @@ final public class GPS extends FragmentActivity {
     }
 
     private void locationListenerHelper(Location location) {
-        if(geoPointAcc.size() < 10 && location.getAccuracy() > 19) {
+        if(location.getAccuracy() >= 20) {
+
+            latitude = location.getLatitude();
+            longitude = location.getLongitude();
+            accuracy = location.getAccuracy();
+            altitude = location.getAltitude();
+
+            geoPointLat.clear();
+            geoPointLon.clear();
+            geoPointAlt.clear();
+            geoPointAcc.clear();
+
+            CallbackLib.gpsCallback();
+
+        } else if(geoPointAcc.size() < 10) {
 
             geoPointLat.add(location.getLatitude());
             geoPointLon.add(location.getLongitude());
             geoPointAlt.add(location.getAltitude());
             geoPointAcc.add((double)location.getAccuracy());
 
-        } else if(location.getAccuracy() > 19){
+        } else {
 
             Double lat[] = new Double[10];
             Double lon[] = new Double[10];

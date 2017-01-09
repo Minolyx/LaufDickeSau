@@ -8,6 +8,7 @@ import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 
@@ -100,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
 
                                 }
 
-                            }, !ThreadOverhaul.REMEMBER, 10);
+                            }, !ThreadOverhaul.REMEMBER, 4);
                             that.thr.start();
                         }
 
@@ -115,6 +116,15 @@ public class MainActivity extends AppCompatActivity {
                                     @Override
                                     public void run() {
 
+                                        if(seconds == 59) {
+                                            seconds = 0;
+                                            minutes++;
+                                            if(minutes == 59) {
+                                                minutes = 0;
+                                                hours++;
+                                            }
+                                        }
+
                                         textView.setText("\nLat: "
                                                 + gps.getLatitude()
                                                 + "\nLong: "
@@ -127,15 +137,6 @@ public class MainActivity extends AppCompatActivity {
                                                 + String.format("%.2fm", polyline.getDistanceTotal()));
                                         timerString = String.format("%02d:%02d:%02d", hours, minutes, seconds);
                                         textViewTimer.setText(timerString);
-
-                                        if(seconds == 59) {
-                                            seconds = 0;
-                                            minutes++;
-                                            if(minutes == 59) {
-                                                minutes = 0;
-                                                hours++;
-                                            }
-                                        }
 
                                         seconds++;
                                     }
@@ -174,25 +175,10 @@ public class MainActivity extends AppCompatActivity {
 //TODO: Declare State-Callbacks over here ##########################################################
 
     @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
-        if(!isMapOpen) System.exit(0);
-        else isMapOpen = false;
+       // if(!isMapOpen) System.exit(0);
+        //else isMapOpen = false;
 
     }
 }
