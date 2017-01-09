@@ -115,10 +115,10 @@ public class MainActivity extends AppCompatActivity {
                                         @Override
                                         public void run() {
 
-                                            if (seconds == 59) {
+                                            if (seconds > 59) {
                                                 seconds = 0;
                                                 minutes++;
-                                                if (minutes == 59) {
+                                                if (minutes > 59) {
                                                     minutes = 0;
                                                     hours++;
                                                 }

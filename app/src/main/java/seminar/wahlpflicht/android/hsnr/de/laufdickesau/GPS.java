@@ -1,6 +1,7 @@
 package seminar.wahlpflicht.android.hsnr.de.laufdickesau;
 
 import android.Manifest;
+import android.app.Service;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -8,8 +9,10 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -27,7 +30,7 @@ import static android.location.LocationProvider.TEMPORARILY_UNAVAILABLE;
 
 //TODO: Do NOT touch this class!!!! ################################################################
 
-final public class GPS {
+final public class GPS extends Service{
 
     private static GPS gps = null;
     private MainActivity mainActivity = null;
@@ -125,7 +128,6 @@ final public class GPS {
 
         }
     }
-
 
     protected void initializeLocationListener() {
             this.locationListener = new LocationListener() {
@@ -230,5 +232,23 @@ final public class GPS {
         result = 31 * result + locationListener.hashCode();
         result = 31 * result + gpsLocation.hashCode();
         return result;
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
+
+        return START_STICKY; //Service got to be killed manually!
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 }
