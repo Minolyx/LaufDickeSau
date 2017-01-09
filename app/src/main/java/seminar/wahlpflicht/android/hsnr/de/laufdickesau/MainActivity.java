@@ -38,138 +38,139 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
 //TODO: Init variables over here ###################################################################
 
-        gps = GPS.initGPSService(this);
-        CallbackLib.initCallbackLib(this);
-        MapsActivity.initMapsActivity(this);
-        polyline = Polyline.initPolyline(this);
-        gpsButton = (Button) findViewById(R.id.startButton);
-        textView = (TextView) findViewById(R.id.textView);
-        textViewTimer = (TextView) findViewById(R.id.timerTextView);
-        textViewTimer.setVisibility(View.INVISIBLE);
-        textView.setText("\n\n\n\nHold Start/Stop to show map\n");
-        textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            gps = GPS.initGPSService(this);
+            CallbackLib.initCallbackLib(this);
+            MapsActivity.initMapsActivity(this);
+            polyline = Polyline.initPolyline(this);
+            gpsButton = (Button) findViewById(R.id.startButton);
+            textView = (TextView) findViewById(R.id.textView);
+            textViewTimer = (TextView) findViewById(R.id.timerTextView);
+            textViewTimer.setVisibility(View.INVISIBLE);
+            textView.setText("\n\n\n\nHold Start/Stop to show map\n");
+            textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
 
 //TODO: Set buttons/views ect. over here ###########################################################
 
-        gpsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+            gpsButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
 
-                try {
-                    if (gpsButton.getText().equals("Start")) {
+                    try {
+                        if (gpsButton.getText().equals("Start")) {
 
-                        gps.requestLocationUpdates();
+                            gps.requestLocationUpdates();
 
-                        if(!started) {
-                            that.thr = new ThreadOverhaul("Countdown_10", 1000, "startTimer", new Object() {
+                            if (!started) {
+                                that.thr = new ThreadOverhaul("Countdown_10", 1000, "startTimer", new Object() {
 
-                                private int counter = 3;
+                                    private int counter = 3;
+
+                                    public void startTimer() {
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                that.textView.setTextSize(56);
+                                                that.textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                                                that.textView.setText("\n" + counter);
+                                                counter--;
+
+                                                if (counter < 0) {
+
+                                                    that.textView.setTextSize(24);
+
+                                                    textView.setText("\nLat: "
+                                                            + gps.getLatitude()
+                                                            + "\nLong: "
+                                                            + gps.getLongitude()
+                                                            + "\nAlt: "
+                                                            + gps.getAltitude()
+                                                            + "\nAcc: "
+                                                            + gps.getAccuracy()
+                                                            + "\nDistance: "
+                                                            + String.format("%.2fm", polyline.getDistanceTotal()));
+
+                                                    that.thr.getThreadByName("timeElapsed").start();
+                                                    textViewTimer.setVisibility(View.VISIBLE);
+                                                    that.started = true;
+                                                }
+                                            }
+                                        });
+
+                                    }
+
+                                }, !ThreadOverhaul.REMEMBER, 4);
+                                that.thr.start();
+                            }
+
+                            new ThreadOverhaul("timeElapsed", 1000, "startTimer", new Object() {
+
+                                private long seconds = 0;
+                                private long minutes = 0;
+                                private long hours = 0;
 
                                 public void startTimer() {
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            that.textView.setTextSize(56);
-                                            that.textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-                                            that.textView.setText("\n" + counter);
-                                            counter--;
 
-                                            if (counter < 0) {
-
-                                                that.textView.setTextSize(24);
-
-                                                textView.setText("\nLat: "
-                                                        + gps.getLatitude()
-                                                        + "\nLong: "
-                                                        + gps.getLongitude()
-                                                        + "\nAlt: "
-                                                        + gps.getAltitude()
-                                                        + "\nAcc: "
-                                                        + gps.getAccuracy()
-                                                        + "\nDistance: "
-                                                        + String.format("%.2fm", polyline.getDistanceTotal()));
-
-                                                that.thr.getThreadByName("timeElapsed").start();
-                                                textViewTimer.setVisibility(View.VISIBLE);
-                                                that.started = true;
+                                            if (seconds == 59) {
+                                                seconds = 0;
+                                                minutes++;
+                                                if (minutes == 59) {
+                                                    minutes = 0;
+                                                    hours++;
+                                                }
                                             }
+
+                                            textView.setText("\nLat: "
+                                                    + gps.getLatitude()
+                                                    + "\nLong: "
+                                                    + gps.getLongitude()
+                                                    + "\nAlt: "
+                                                    + gps.getAltitude()
+                                                    + "\nAcc: "
+                                                    + gps.getAccuracy()
+                                                    + "\nDistance: "
+                                                    + String.format("%.2fm", polyline.getDistanceTotal()));
+                                            timerString = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+                                            textViewTimer.setText(timerString);
+
+                                            seconds++;
                                         }
                                     });
 
                                 }
 
-                            }, !ThreadOverhaul.REMEMBER, 4);
-                            that.thr.start();
+                            }, ThreadOverhaul.REMEMBER, 1000000000);
+
+                            thr.getThreadByName("timeElapsed").wake();
+                            gpsButton.setText("Stop");
+
+                        } else {
+                            gps.removeLocationUpdates();
+                            gpsButton.setText("Start");
+                            thr.getThreadByName("timeElapsed").hibernate();
                         }
-
-                        new ThreadOverhaul("timeElapsed", 1000, "startTimer", new Object() {
-
-                            private long seconds = 0;
-                            private long minutes = 0;
-                            private long hours = 0;
-
-                            public void startTimer() {
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-
-                                        if(seconds == 59) {
-                                            seconds = 0;
-                                            minutes++;
-                                            if(minutes == 59) {
-                                                minutes = 0;
-                                                hours++;
-                                            }
-                                        }
-
-                                        textView.setText("\nLat: "
-                                                + gps.getLatitude()
-                                                + "\nLong: "
-                                                + gps.getLongitude()
-                                                + "\nAlt: "
-                                                + gps.getAltitude()
-                                                + "\nAcc: "
-                                                + gps.getAccuracy()
-                                                + "\nDistance: "
-                                                + String.format("%.2fm", polyline.getDistanceTotal()));
-                                        timerString = String.format("%02d:%02d:%02d", hours, minutes, seconds);
-                                        textViewTimer.setText(timerString);
-
-                                        seconds++;
-                                    }
-                                });
-
-                            }
-
-                        }, ThreadOverhaul.REMEMBER, 1000000000);
-
-                        thr.getThreadByName("timeElapsed").wake();
-                        gpsButton.setText("Stop");
-
-                    } else {
-                        gps.removeLocationUpdates();
-                        gpsButton.setText("Start");
-                        thr.getThreadByName("timeElapsed").hibernate();
+                    } catch (Exception e) {
                     }
-                } catch (Exception e) {}
 
-            }
-        });
+                }
+            });
 
-        gpsButton.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                try {
-                    startActivity(new Intent(MainActivity.this, MapsActivity.class));
-                    isMapOpen = true;
-                } catch (Exception e) {}
-                return true;
+            gpsButton.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    try {
+                        startActivity(new Intent(MainActivity.this, MapsActivity.class));
+                        isMapOpen = true;
+                    } catch (Exception e) {
+                    }
+                    return true;
 
-            }
-        });
+                }
+            });
     }
 
 //TODO: Declare State-Callbacks over here ##########################################################
@@ -177,8 +178,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-       // if(!isMapOpen) System.exit(0);
-        //else isMapOpen = false;
-
+        if(!isMapOpen) System.exit(0);
+        else isMapOpen = false;
     }
 }

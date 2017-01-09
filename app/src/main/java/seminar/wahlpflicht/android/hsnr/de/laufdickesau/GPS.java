@@ -43,7 +43,6 @@ final public class GPS extends FragmentActivity {
     private double altitude = 0.0;
     private double accuracy = 0.0;
     private int REFRESH_RATE = 200;
-    private boolean calculate = false;
 
     private GPS(MainActivity that) {
         this.mainActivity = that;
@@ -75,21 +74,8 @@ final public class GPS extends FragmentActivity {
     }
 
     private void locationListenerHelper(Location location) {
-        if(location.getAccuracy() >= 20) {
 
-            latitude = location.getLatitude();
-            longitude = location.getLongitude();
-            accuracy = location.getAccuracy();
-            altitude = location.getAltitude();
-
-            geoPointLat.clear();
-            geoPointLon.clear();
-            geoPointAlt.clear();
-            geoPointAcc.clear();
-
-            CallbackLib.gpsCallback();
-
-        } else if(geoPointAcc.size() < 10) {
+        if(geoPointAcc.size() < 10) {
 
             geoPointLat.add(location.getLatitude());
             geoPointLon.add(location.getLongitude());
@@ -132,6 +118,7 @@ final public class GPS extends FragmentActivity {
 
         }
     }
+
 
     protected void initializeLocationListener() {
             this.locationListener = new LocationListener() {
