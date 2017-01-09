@@ -27,7 +27,7 @@ import static android.location.LocationProvider.TEMPORARILY_UNAVAILABLE;
 
 //TODO: Do NOT touch this class!!!! ################################################################
 
-final public class GPS extends FragmentActivity {
+final public class GPS {
 
     private static GPS gps = null;
     private MainActivity mainActivity = null;
@@ -42,17 +42,18 @@ final public class GPS extends FragmentActivity {
     private double longitude = 0.0;
     private double altitude = 0.0;
     private double accuracy = 0.0;
-    private int REFRESH_RATE = 200;
+    private int REFRESH_RATE = 100;
+    private final int SIZE = 20;
 
     private GPS(MainActivity that) {
         this.mainActivity = that;
         new PermissionHandler(that);
         initializeLocationManager();
         initializeLocationListener();
-        this.geoPointLat = new ArrayList<>(10);
-        this.geoPointLon = new ArrayList<>(10);
-        this.geoPointAlt = new ArrayList<>(10);
-        this.geoPointAcc = new ArrayList<>(10);
+        this.geoPointLat = new ArrayList<>(SIZE);
+        this.geoPointLon = new ArrayList<>(SIZE);
+        this.geoPointAlt = new ArrayList<>(SIZE);
+        this.geoPointAcc = new ArrayList<>(SIZE);
     }
 
     static protected GPS initGPSService(MainActivity that) {
@@ -70,34 +71,31 @@ final public class GPS extends FragmentActivity {
     protected double getAltitude() { return this.altitude; }
 
     protected void initializeLocationManager() {
-        this.locationManager = (LocationManager) mainActivity.getSystemService(LOCATION_SERVICE);
+        this.locationManager = (LocationManager) mainActivity.getSystemService(mainActivity.LOCATION_SERVICE);
     }
 
     private void locationListenerHelper(Location location) {
 
-        if(geoPointAcc.size() < 10 && location.getAccuracy() >= 16) {
+        if(geoPointAcc.size() < SIZE) {
 
             geoPointLat.add(location.getLatitude());
             geoPointLon.add(location.getLongitude());
             geoPointAlt.add(location.getAltitude());
             geoPointAcc.add((double)location.getAccuracy());
 
-        } else if (location.getAccuracy() >= 16){
+        } else {
 
-            Double lat[] = new Double[10];
-            Double lon[] = new Double[10];
-            Double alt[] = new Double[10];
-            Double acc[] = new Double[10];
+            Double lat[] = new Double[SIZE];
+            Double lon[] = new Double[SIZE];
+            Double alt[] = new Double[SIZE];
+            Double acc[] = new Double[SIZE];
+            double tmp = 0.0;
+            int marker = 0;
 
             geoPointLat.toArray(lat);
             geoPointLon.toArray(lon);
             geoPointAlt.toArray(alt);
             geoPointAcc.toArray(acc);
-
-            Arrays.sort(lat);
-            Arrays.sort(lon);
-            Arrays.sort(alt);
-            Arrays.sort(acc);
 
             geoPointLat.clear();
             geoPointLon.clear();
@@ -109,10 +107,19 @@ final public class GPS extends FragmentActivity {
             geoPointAlt.add(location.getAltitude());
             geoPointAcc.add((double)location.getAccuracy());
 
-            latitude = (lat[4] + lat[5]) / 2;
-            longitude = (lon[4] + lon[5]) / 2;
-            accuracy = (acc[4] + acc[5]) / 2;
-            altitude = (alt[4] + alt[5]) / 2;
+            for(int i = 0; i < lat.length; i++) {
+                if(lat[i] >= tmp) {
+                    tmp = lat[i];
+                    marker = i;
+                }
+            }
+
+            latitude = lat[marker];
+            longitude = lon[marker];
+            accuracy = acc[marker];
+            altitude = alt[marker];
+
+            marker = 0;
 
             CallbackLib.gpsCallback();
 
