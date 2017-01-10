@@ -130,21 +130,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 thr.start();
             }
 
-
-
-
-            //TODO: TEST
-            //drawPolyline();
-/*
-        try{
-            drawPolyline();
-        }catch (Exception e){
-            // Add a marker in Sydney and move the camera
-            LatLng sydney = new LatLng(-34, 151);
-            mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        }
-*/
         }
 
 
@@ -173,28 +158,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.clear();
 
         Marker startMarker = getStartMarker();
-        Marker finishMarker = getFinishMarker();
 
-        mMap.addPolyline(polylineOpt);
+        if(polylineOpt.getPoints().size() == 1){
+            mMap.addPolyline(polylineOpt);
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(polylineOpt.getPoints().get(0).latitude, polylineOpt.getPoints().get(0).longitude), zoomLevel), 2000, null);
+        }else{
+
+            Marker finishMarker = getFinishMarker();
+            mMap.addPolyline(polylineOpt);
 
 
-        if(running){
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(polyline.getCurrentPosition(), zoomLevel), 2000, null);
-        }else {
-            mMap.moveCamera(getCamBounds(startMarker, finishMarker));
-            finishMarker.showInfoWindow();
+            if(running){
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(polyline.getCurrentPosition(), zoomLevel), 2000, null);
+            }else {
+                mMap.moveCamera(getCamBounds(startMarker, finishMarker));
+                finishMarker.showInfoWindow();
+            }
         }
+
+
     }
 
     protected Marker getStartMarker(){
         Marker start = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(polylineOpt.getPoints().get(0).latitude, polylineOpt.getPoints().get(0).longitude))
                 .title("Start")
-                //.icon(BitmapDescriptorFactory.fromResource(R.drawable.piggy_start))
-                // gif leider nicht möglich ohne methode zu schreiben die ständig marker entfernt und
-                // neuen marker setzt mit dem nächsten bild. und so sieht das nicht sehr gut aus.
-                // kannst es ja mal einkommentieren dann siehste es
-                .icon(BitmapDescriptorFactory.defaultMarker(250))
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.piggy_start_small))
         );
         return start;
     }
@@ -203,7 +192,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .position(polyline.getCurrentPosition())
                 .title("Current Position")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.piggy_run_small))
-                //.icon(BitmapDescriptorFactory.defaultMarker(320))
                 .snippet("Time: " + mainActivity.timerString + "\n" + String.format("Distance: %.2fm", polyline.getDistanceTotal()))
         );
         return finish;
@@ -212,8 +200,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected Marker getDefaultMarker(){
 
         Marker hsnr = mMap.addMarker(new MarkerOptions()
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.piggy_start_small))
                 .position(new LatLng(51.31686, 6.57144))
-                .title("HSNR")
+                .title("ups...")
                 .snippet("No GPS available."));
 
         return hsnr;

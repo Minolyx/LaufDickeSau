@@ -20,15 +20,15 @@
         android:fontFamily="sans-serif-smallcaps"
         android:layout_height="200dp"
         android:layout_alignParentBottom="true"
-        android:backgroundTint="@color/brightpink"
-        android:textColor="@color/darkpink"
+        android:backgroundTint="@color/middleblue"
+        android:textColor="@color/colorPrimaryDark"
         android:elevation="8dp" />
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/pink"
+        android:textColor="@color/middleblue"
         android:textSize="18sp"
         android:layout_alignParentStart="true" />
 
@@ -41,7 +41,7 @@
         android:layout_marginBottom="30dp"
         android:id="@+id/timerTextView"
         android:textStyle="normal|bold"
-        android:textColor="@color/pink"
+        android:textColor="@color/blue"
         android:textSize="36sp" />
 
 </RelativeLayout>

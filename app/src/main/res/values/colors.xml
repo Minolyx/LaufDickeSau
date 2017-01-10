@@ -13,7 +13,9 @@
     <color name="static_text_color">#003366</color>
     <color name="journal_entry_listitem_text_color">#003366</color>
     <color name="note_text_disabled">#333333</color>
-    <color name="blue">#0000FF</color>
+    <color name="blue">#3B88F5</color>
+    <color name="middleblue">#4E9BDE</color>
+    <color name="lightblue">#66A9E3</color>
     <color name="navy">#6699FF</color>
     <color name="sky">#0099CC</color>
     <color name="gray">#808080</color>
