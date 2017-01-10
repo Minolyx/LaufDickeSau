@@ -71,14 +71,13 @@ public class MainActivity extends AppCompatActivity {
                                         runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
-                                                that.textView.setTextSize(56);
-                                                that.textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-                                                that.textView.setText("\n" + counter);
+                                                that.gpsButton.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                                                that.gpsButton.setText(counter + "");
                                                 counter--;
 
                                                 if (counter < 0) {
 
-                                                    that.textView.setTextSize(24);
+                                                    that.gpsButton.setTextSize(36);
 
                                                     textView.setText("\nLat: "
                                                             + gps.getLatitude()
@@ -94,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
                                                     that.thr.getThreadByName("timeElapsed").start();
                                                     textViewTimer.setVisibility(View.VISIBLE);
                                                     that.started = true;
+                                                    that.gpsButton.setText("Stop");
                                                 }
                                             }
                                         });
