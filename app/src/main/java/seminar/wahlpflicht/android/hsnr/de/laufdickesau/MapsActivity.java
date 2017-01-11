@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -31,6 +30,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static Polyline polyline = null;
     private PolylineOptions polylineOpt = new PolylineOptions();
     private ThreadOverhaul thr = null;
+    private ThreadOverhaul thrEndMarker = null;
+    private int currentEndMarker = 0;
+    private Marker endMarker = null;
     private LatLng lastDrawnPosition = null;
     private boolean refresh = true;
     private boolean noRefresh = false;
@@ -51,6 +53,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+
+        thr = new ThreadOverhaul("mapUpdater", 2000, "show", new Object() {
+
+            public void show() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(lastDrawnPosition != polyline.getPreviousPosition()) {
+                            drawPolyline(refresh);
+                            lastDrawnPosition = polyline.getPreviousPosition();
+                        }
+                    }
+                });
+
+            }
+
+        }, ThreadOverhaul.REMEMBER, 1000000);
+
+        thrEndMarker = new ThreadOverhaul("markerUpdater", 100, "show", new Object() {
+
+            public void show() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        endMarker.setIcon(getCurrentEndMarker());
+                    }
+                    });
+
+            }
+
+        }, ThreadOverhaul.REMEMBER, 1000000);
 
     }
 
@@ -93,26 +126,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
         if (polyline.getCurrentPosition() == null){
-            Marker hsnrMarker = getDefaultMarker();
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hsnrMarker.getPosition(), zoomLevel));
-            hsnrMarker.showInfoWindow();
+            Marker defaultMarker = getDefaultMarker();
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultMarker.getPosition(), zoomLevel));
+            defaultMarker.showInfoWindow();
         }else{
-            thr = new ThreadOverhaul("mapUpdater", 2000, "show", new Object() {
-
-                public void show() {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(lastDrawnPosition != polyline.getPreviousPosition()) {
-                                drawPolyline(refresh);
-                                lastDrawnPosition = polyline.getPreviousPosition();
-                            }
-                        }
-                    });
-
-                }
-
-            }, ThreadOverhaul.REMEMBER, 1000000);
 
             if (mainActivity.gpsButton.getText().equals("Start")){
                 drawPolyline(noRefresh);
@@ -125,22 +142,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onResume() {
         super.onResume();
-        new ThreadOverhaul("mapUpdater", 2000, "show", new Object() {
-
-            public void show() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(lastDrawnPosition != polyline.getPreviousPosition()) {
-                            drawPolyline(refresh);
-                            lastDrawnPosition = polyline.getPreviousPosition();
-                        }
-                    }
-                });
-
-            }
-
-        }, ThreadOverhaul.REMEMBER, 1000000).start();
+        thr.start();
     }
 
     @Override
@@ -152,6 +154,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onPause() {
         super.onPause();
+        thr.kill();
     }
 
     protected void drawPolyline(boolean running){
@@ -163,17 +166,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if(polylineOpt.getPoints().size() == 1){
             mMap.addPolyline(polylineOpt);
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(polylineOpt.getPoints().get(0).latitude, polylineOpt.getPoints().get(0).longitude), zoomLevel), 2000, null);
+            startMarker.showInfoWindow();
         }else{
 
-            Marker finishMarker = getFinishMarker();
+            endMarker = getEndMarker();
             mMap.addPolyline(polylineOpt);
 
+            thrEndMarker.start();
 
             if(running){
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(polyline.getCurrentPosition(), zoomLevel), 2000, null);
             }else {
-                mMap.moveCamera(getCamBounds(startMarker, finishMarker));
-                finishMarker.showInfoWindow();
+                thr.kill();
+                mMap.moveCamera(getCamBounds(startMarker, endMarker));
+                endMarker.showInfoWindow();
             }
         }
     }
@@ -182,15 +188,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Marker start = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(polylineOpt.getPoints().get(0).latitude, polylineOpt.getPoints().get(0).longitude))
                 .title("Start")
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.piggy_start_small))
+                .snippet("Lauf dicke Sau!")
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.piggy_start))
         );
         return start;
     }
-    protected Marker getFinishMarker(){
+    protected Marker getEndMarker(){
         Marker finish = mMap.addMarker(new MarkerOptions()
                 .position(polyline.getCurrentPosition())
                 .title("Current Position")
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.piggy_run_small))
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.piggy_run))
                 .snippet("Time: " + mainActivity.timerString + "\n" + String.format("Distance: %.2fm", polyline.getDistanceTotal()))
         );
         return finish;
@@ -199,12 +206,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected Marker getDefaultMarker(){
 
         Marker hsnr = mMap.addMarker(new MarkerOptions()
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.piggy_start_small))
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.piggy_default_small))
                 .position(new LatLng(51.31686, 6.57144))
-                .title("ups...")
-                .snippet("No GPS available."));
+                .title("Waiting...")
+                .snippet("For GPS Signal"));
 
         return hsnr;
+    }
+
+    protected BitmapDescriptor getCurrentEndMarker(){
+        int nr = currentEndMarker % 6;
+        if(nr == 0){
+            currentEndMarker++;
+            return BitmapDescriptorFactory.fromResource(R.drawable.piggy_run_01);
+        }else if(nr == 1){
+            currentEndMarker++;
+            return BitmapDescriptorFactory.fromResource(R.drawable.piggy_run_03);
+
+        }else if(nr == 2){
+            currentEndMarker++;
+            return BitmapDescriptorFactory.fromResource(R.drawable.piggy_run_05);
+
+        }else if(nr == 3){
+            currentEndMarker++;
+            return BitmapDescriptorFactory.fromResource(R.drawable.piggy_run_07);
+
+        }else if(nr == 4){
+            currentEndMarker++;
+            return BitmapDescriptorFactory.fromResource(R.drawable.piggy_run_09);
+
+        }else{
+            currentEndMarker = 0;
+            return BitmapDescriptorFactory.fromResource(R.drawable.piggy_run_10);
+        }
     }
 
     protected CameraUpdate getCamBounds(Marker finish, Marker start){

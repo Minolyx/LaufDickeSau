@@ -55,7 +55,7 @@ public class Polyline {
             previousPosition = currentPosition;
         }else{
 
-            if((distance += distance(previousPosition, currentPosition)) > 1){
+            if((distance = distance(previousPosition, currentPosition)) > 1){
                 polylineOpt.add(currentPosition);
                 distanceTotal += distance;
 

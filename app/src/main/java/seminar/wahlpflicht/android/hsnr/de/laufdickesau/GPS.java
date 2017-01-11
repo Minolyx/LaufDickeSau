@@ -42,7 +42,7 @@ final public class GPS extends Service{
     private ArrayList<Double> geoPointAcc = null;
 
     private int REFRESH_RATE = 100;
-    private final int SIZE = 20;
+    private final int SIZE = 3;
 
     public GPS() {
         initializeLocationListener();
