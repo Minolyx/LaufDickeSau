@@ -2,6 +2,7 @@ package seminar.wahlpflicht.android.hsnr.de.laufdickesau;
 
 import android.Manifest;
 import android.app.Service;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -32,49 +33,28 @@ import static android.location.LocationProvider.TEMPORARILY_UNAVAILABLE;
 
 final public class GPS extends Service{
 
-    private static GPS gps = null;
-    private MainActivity mainActivity = null;
+    private Polyline polyline = null;
     private LocationManager locationManager = null;
     private LocationListener locationListener = null;
-    private Location gpsLocation = null;
     private ArrayList<Double> geoPointLat = null;
     private ArrayList<Double> geoPointLon = null;
     private ArrayList<Double> geoPointAlt = null;
     private ArrayList<Double> geoPointAcc = null;
-    private double latitude = 0.0;
-    private double longitude = 0.0;
-    private double altitude = 0.0;
-    private double accuracy = 0.0;
+
     private int REFRESH_RATE = 100;
     private final int SIZE = 20;
 
-    private GPS(MainActivity that) {
-        this.mainActivity = that;
-        new PermissionHandler(that);
-        initializeLocationManager();
+    public GPS() {
         initializeLocationListener();
+        polyline = Polyline.initPolyline();
         this.geoPointLat = new ArrayList<>(SIZE);
         this.geoPointLon = new ArrayList<>(SIZE);
         this.geoPointAlt = new ArrayList<>(SIZE);
         this.geoPointAcc = new ArrayList<>(SIZE);
     }
 
-    static protected GPS initGPSService(MainActivity that) {
-        if (gps == null) return new GPS(that);
-        return gps;
-    }
-
-    protected double getLongitude() {
-        return this.longitude;
-    }
-    protected double getLatitude() {
-        return this.latitude;
-    }
-    protected int getAccuracy() { return (int)this.accuracy; }
-    protected double getAltitude() { return this.altitude; }
-
     protected void initializeLocationManager() {
-        this.locationManager = (LocationManager) mainActivity.getSystemService(mainActivity.LOCATION_SERVICE);
+        this.locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
     }
 
     private void locationListenerHelper(Location location) {
@@ -117,16 +97,22 @@ final public class GPS extends Service{
                 }
             }
 
-            latitude = lat[marker];
-            longitude = lon[marker];
-            accuracy = acc[marker];
-            altitude = alt[marker];
+            Intent i = new Intent("GPS");
+            i.putExtra("lat", lat[marker]);
+            i.putExtra("lon", lon[marker]);
+            i.putExtra("alt", alt[marker]);
+            i.putExtra("acc", acc[marker]);
+            sendBroadcast(i);
+
+            polyline.setCurrentPosition(lat[marker], lon[marker]);
 
             marker = 0;
 
             CallbackLib.gpsCallback();
 
         }
+
+        initializeLocationManager();
     }
 
     protected void initializeLocationListener() {
@@ -157,82 +143,24 @@ final public class GPS extends Service{
 
                 @Override
                 public void onProviderDisabled(String s) {
-                    if(ContextCompat.checkSelfPermission(mainActivity, Manifest.permission.LOCATION_HARDWARE) != PackageManager.PERMISSION_GRANTED)
-                    new AlertDialog.Builder(mainActivity)
-                            .setTitle("Gps service request..")
-                            .setMessage("Dear fatty, this application requires gps service permission. " +
-                                    "Would you like to turn on your mobile phone's gps service now?")
-                            .setCancelable(false)
-                            .setPositiveButton("ok", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    mainActivity.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                                }
-                            })
-                            .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-
-                                @Override
-                                public void onClick(DialogInterface dialog, int i) {
-                                    mainActivity.finish();
-                                }
-                            }).create().show();
+                    Intent i = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(i);
                 }
 
             };
     }
 
-    protected void setRefreshRate(int rate_ms) {
-        this.REFRESH_RATE = rate_ms;
-        Toast.makeText(mainActivity, "Refresh rate set to " + this.REFRESH_RATE + "ms!", Toast.LENGTH_SHORT).show();
-    }
-
     protected void requestLocationUpdates() {
-        try {
-            if(ContextCompat.checkSelfPermission(mainActivity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-            this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, this.REFRESH_RATE, 0, this.locationListener);
-            else new PermissionHandler(mainActivity);
-        }catch (SecurityException se) {
-
-            new AlertDialog.Builder(mainActivity)
-                .setTitle("GPS request denied..")
-                .setMessage("Dear fatty, this app requires gps service.\n" +
-                        " There's no magic in this world thou it won't work without!")
-                .setCancelable(false)
-                .setPositiveButton("Hmmmm, ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {System.exit(0);
-                    }
-                });
-        }
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+        this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, this.REFRESH_RATE, 0, this.locationListener);
     }
 
     protected void removeLocationUpdates() {
-        if(ContextCompat.checkSelfPermission(mainActivity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
         this.locationManager.removeUpdates(this.locationListener);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        GPS gps = (GPS) o;
-
-        if (!mainActivity.equals(gps.mainActivity)) return false;
-        if (!locationManager.equals(gps.locationManager)) return false;
-        if (!locationListener.equals(gps.locationListener)) return false;
-        return gpsLocation.equals(gps.gpsLocation);
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = mainActivity.hashCode();
-        result = 31 * result + locationManager.hashCode();
-        result = 31 * result + locationListener.hashCode();
-        result = 31 * result + gpsLocation.hashCode();
-        return result;
-    }
 
     @Nullable
     @Override
@@ -250,5 +178,16 @@ final public class GPS extends Service{
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        if(locationManager != null) removeLocationUpdates();
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        initializeLocationManager();
+        initializeLocationListener();
+        requestLocationUpdates();
+
     }
 }

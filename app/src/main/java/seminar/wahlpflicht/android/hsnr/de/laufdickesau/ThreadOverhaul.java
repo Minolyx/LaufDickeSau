@@ -175,7 +175,7 @@ final public class ThreadOverhaul<T> extends Thread {
         return this;
     }
 
-    protected ThreadOverhaul getThreadByName(String str) {
+    protected static ThreadOverhaul getThreadByName(String str) {
 
         try {
             if (queue != null) {
@@ -190,8 +190,10 @@ final public class ThreadOverhaul<T> extends Thread {
             Log.d("Exception", "Exception on getThreadByName: ".concat(e.getMessage()));
         }
 
-        return this;
+        return null;
     }
+
+
 
     protected ThreadOverhaul setRefreshRate(int milliSeconds) {
         this.milliSeconds = milliSeconds;
@@ -244,4 +246,5 @@ final public class ThreadOverhaul<T> extends Thread {
         result = 31 * result + (restartable ? 1 : 0);
         return result;
     }
+
 }

@@ -14,20 +14,19 @@ import android.util.Log;
 public class Polyline {
 
     private static Polyline polyline =null;
-    private MainActivity mainActivity = null;
     protected static LatLng currentPosition = null;
     protected static LatLng previousPosition = null;
     protected double distance = 0;
     protected static double distanceTotal = 0;
-    protected static PolylineOptions polylineOpt = new PolylineOptions().color(R.color.sky);
+    protected static PolylineOptions polylineOpt = null;
 
 
-    private Polyline(MainActivity that) {
-        this.mainActivity = that;
-    }
+    static protected Polyline initPolyline(){
+        if(polyline == null) {
+            polyline = new Polyline();
+            polylineOpt = new PolylineOptions().color(R.color.sky);
+        }
 
-    static protected Polyline initPolyline(MainActivity that){
-        if (polyline == null) return new Polyline(that);
         return polyline;
     }
 
