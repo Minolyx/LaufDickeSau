@@ -3,10 +3,9 @@
     <color name="colorPrimary">#7980aa</color>
     <color name="colorPrimaryDark">#fafafa</color>
     <color name="colorAccent">#FF4081</color>
-
-
     <color name="red">#FF0000</color>
     <color name="white">#FFFFFF</color>
+    <color name="purple">#Fc23ca</color>
     <color name="black">#000000</color>
     <color name="symptom_color_selected">#003366</color>
     <color name="reaction_color_selected">#003366</color>
@@ -28,7 +27,7 @@
     <color name="pressed_color">#FF8E4067</color>
     <color name="focussed_color">#DD8E4067</color>
     <color name="pink">#FF69B4</color>
-    <color name="brightpink">#ffa0cf</color>
+    <color name="brightpink">#3affa0cf</color>
     <color name="darkpink">#ff1b8d</color>
 
 
