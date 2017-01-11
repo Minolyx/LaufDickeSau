@@ -67,9 +67,10 @@ public class MainActivity extends AppCompatActivity {
                 lon = (double)intent.getExtras().get("lon");
                 dist = (double)intent.getExtras().get("dist");
                 speed = (double)intent.getExtras().get("speed");
-                speed = speed_prev - speed; //hier speed_prev - speed und im setText auch nochmal? wieso überhaupt speed - speed?
 
-                if(speed < 0) speed = speed * -1;
+
+                if(speed < speed_prev) speed = speed - speed_prev;
+                else speed = speed_prev - speed;
 
                 textView.setText("\nLat: " + lat + "\nLon: " + lon
                         + String.format("\n\n < Distance >  \n%.2f km \n%.0f meter \nSpeed: %.2f m/s", dist / 1000, dist, speed_prev - speed));
