@@ -38,6 +38,9 @@ public class MainActivity extends AppCompatActivity {
     protected String timerString = "";
     protected double lat = 0.0;
     protected double lon = 0.0;
+    protected double dist = 0.0;
+    protected double speed = 0.0;
+    protected double speed_prev = 0.0;
     protected BroadcastReceiver br = null;
 
     @Override
@@ -59,10 +62,19 @@ public class MainActivity extends AppCompatActivity {
         br = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+
                 lat = (double)intent.getExtras().get("lat");
                 lon = (double)intent.getExtras().get("lon");
+                dist = (double)intent.getExtras().get("dist");
+                speed = (double)intent.getExtras().get("speed");
+                speed = speed_prev - speed;
 
-                textView.setText("\n\n\nLat: " + lat + "\nLon: " + lon);
+                if(speed < 0) speed = speed * -1;
+
+                textView.setText("\nLat: " + lat + "\nLon: " + lon
+                        + String.format("\n\n < Distance >  \n%.2f km \n%.0f meter \nSpeed: %.2f m/s", dist / 1000, dist, speed_prev - speed));
+
+                speed_prev = speed;
             }
         };
 
@@ -120,8 +132,8 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        that.gpsButton.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                         that.gpsButton.setText(counter + "");
+                        that.gpsButton.setTextSize(56);
                         counter--;
 
                         if (counter < 0) {

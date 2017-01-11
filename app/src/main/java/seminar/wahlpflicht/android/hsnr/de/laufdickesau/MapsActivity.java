@@ -97,7 +97,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hsnrMarker.getPosition(), zoomLevel));
             hsnrMarker.showInfoWindow();
         }else{
-            thr = new ThreadOverhaul("mapUpdater", 5000, "show", new Object() {
+            thr = new ThreadOverhaul("mapUpdater", 2000, "show", new Object() {
 
                 public void show() {
                     runOnUiThread(new Runnable() {
@@ -125,7 +125,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onResume() {
         super.onResume();
-        new ThreadOverhaul("mapUpdater", 5000, "show", new Object() {
+        new ThreadOverhaul("mapUpdater", 2000, "show", new Object() {
 
             public void show() {
                 runOnUiThread(new Runnable() {

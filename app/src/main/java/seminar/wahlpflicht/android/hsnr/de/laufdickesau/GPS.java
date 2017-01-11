@@ -102,6 +102,8 @@ final public class GPS extends Service{
             i.putExtra("lon", lon[marker]);
             i.putExtra("alt", alt[marker]);
             i.putExtra("acc", acc[marker]);
+            i.putExtra("dist", polyline.getDistanceTotal());
+            i.putExtra("speed", polyline.distance);
             sendBroadcast(i);
 
             polyline.setCurrentPosition(lat[marker], lon[marker]);
