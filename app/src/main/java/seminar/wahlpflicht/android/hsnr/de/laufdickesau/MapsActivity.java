@@ -78,6 +78,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     @Override
                     public void run() {
                         endMarker.setIcon(getCurrentEndMarker());
+                        endMarker.setSnippet("Time: " + mainActivity.timerString + "\n" + String.format("Distance: %.2fm", polyline.getDistanceTotal()));
                     }
                     });
 

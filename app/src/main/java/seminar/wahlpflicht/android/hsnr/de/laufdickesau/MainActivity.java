@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
                 lon = (double)intent.getExtras().get("lon");
                 dist = (double)intent.getExtras().get("dist");
                 speed = (double)intent.getExtras().get("speed");
-                speed = speed_prev - speed;
+                speed = speed_prev - speed; //hier speed_prev - speed und im setText auch nochmal? wieso überhaupt speed - speed?
 
                 if(speed < 0) speed = speed * -1;
 
