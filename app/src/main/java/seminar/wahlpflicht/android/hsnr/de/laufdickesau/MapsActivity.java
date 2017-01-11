@@ -178,7 +178,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if(running){
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(polyline.getCurrentPosition(), zoomLevel), 2000, null);
             }else {
-                thr.kill();
+                thr.getThreadByName("mapUpdater").kill();
                 mMap.moveCamera(getCamBounds(startMarker, endMarker));
                 endMarker.showInfoWindow();
             }

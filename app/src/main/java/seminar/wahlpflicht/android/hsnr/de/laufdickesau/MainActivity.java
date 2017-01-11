@@ -68,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
                 dist = (double)intent.getExtras().get("dist");
                 speed = (double)intent.getExtras().get("speed");
 
-
                 if(speed < speed_prev) speed = speed - speed_prev;
                 else speed = speed_prev - speed;
 

@@ -175,7 +175,7 @@ final public class ThreadOverhaul<T> extends Thread {
         return this;
     }
 
-    protected static ThreadOverhaul getThreadByName(String str) {
+    protected ThreadOverhaul getThreadByName(String str) {
 
         try {
             if (queue != null) {
@@ -190,7 +190,7 @@ final public class ThreadOverhaul<T> extends Thread {
             Log.d("Exception", "Exception on getThreadByName: ".concat(e.getMessage()));
         }
 
-        return null;
+        return this;
     }
 
 
